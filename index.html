@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eloiaasoft — Programas de Eloi A.A.</title>
+<meta name="description" content="Portal de los programas de Eloi A.A.: herramientas CNC y G-code, diseño de muebles y matemáticas para la madera. Funcionan en el navegador, sin instalar nada.">
+<style>
+  :root {
+    --acento: #005A9C; --acento-suave: rgba(0,90,156,.10); --fondo: #eef2f6; --panel: #ffffff; --texto: #1d2733; --texto-sec: #5b6878;
+    --borde: #d7dee7; --sombra: 0 6px 22px rgba(20,40,70,.10); --verde: #00897b; --naranja: #c8741a; --madera: #9a6a2f; --madera-suave: rgba(154,106,47,.12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --acento: #5aa9e6; --acento-suave: rgba(90,169,230,.14); --fondo: #14181d; --panel: #1d232a; --texto: #e6ebf0; --texto-sec: #9aa7b5; --borde: #2e3843; --sombra: 0 6px 22px rgba(0,0,0,.35); --verde: #4dd0c4; --naranja: #f0a35e; --madera: #e0ad6c; --madera-suave: rgba(224,173,108,.14); }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif; background: var(--fondo); color: var(--texto); line-height: 1.5; }
+  .envoltura { max-width: 1120px; margin: 0 auto; padding: 32px 22px 40px; }
+  header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .logo { width: 58px; height: 58px; flex: 0 0 auto; }
+  h1 { margin: 0; font-size: clamp(24px, 3.6vw, 36px); letter-spacing: -.01em; }
+  h1 span { color: var(--acento); }
+  .sub { margin: 2px 0 0; color: var(--texto-sec); font-size: 15px; }
+  .barra { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 24px 0 6px; }
+  .buscar { flex: 1 1 260px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--borde); background: var(--panel); color: var(--texto); font: inherit; font-size: 15px; box-shadow: var(--sombra); }
+  .buscar:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { border: 1px solid var(--borde); background: var(--panel); color: var(--texto-sec); padding: 7px 13px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .chip.activo { background: var(--acento); border-color: var(--acento); color: #fff; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--texto-sec); margin: 30px 0 12px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--borde); }
+  .fichas { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; }
+  .ficha { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--sombra); transition: transform .12s, border-color .12s; }
+  .ficha:hover { transform: translateY(-2px); border-color: var(--acento); }
+  .ficha.destacada { border-width: 2px; border-color: var(--acento); }
+  .cab { display: flex; align-items: center; gap: 12px; }
+  .icono { width: 46px; height: 46px; flex: 0 0 auto; border-radius: 11px; background: var(--acento-suave); display: flex; align-items: center; justify-content: center; }
+  .icono svg { width: 27px; height: 27px; stroke: var(--acento); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .madera .icono { background: var(--madera-suave); } .madera .icono svg { stroke: var(--madera); }
+  .nombre { font-size: 17px; font-weight: 700; margin: 0; }
+  .etiqueta { font-size: 11px; font-weight: 600; padding: 1px 8px; border-radius: 9px; background: var(--acento-suave); color: var(--acento); margin-left: 4px; vertical-align: middle; white-space: nowrap; }
+  .etiqueta.nueva { background: rgba(0,137,123,.13); color: var(--verde); }
+  .repo { font-family: Consolas, 'Courier New', monospace; font-size: 12px; color: var(--texto-sec); }
+  .desc { margin: 0; font-size: 14px; color: var(--texto-sec); flex: 1; }
+  .fecha { font-size: 12px; color: var(--texto-sec); min-height: 1em; }
+  .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .boton { display: inline-flex; align-items: center; gap: 6px; padding: 8px 15px; border-radius: 8px; background: var(--acento); color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; }
+  .madera .boton { background: var(--madera); }
+  .boton.sec { background: transparent; color: var(--acento); border: 1px solid var(--acento); }
+  .madera .boton.sec { background: transparent; color: var(--madera); border-color: var(--madera); }
+  .boton:hover { filter: brightness(1.08); }
+  .lista { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; box-shadow: var(--sombra); overflow: hidden; }
+  .fila { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--borde); flex-wrap: wrap; }
+  .fila:first-child { border-top: 0; }
+  .fila .info { flex: 1 1 260px; }
+  .fila b { font-size: 15px; } .fila small { display: block; color: var(--texto-sec); font-size: 13px; }
+  .fila a { color: var(--acento); font-weight: 600; font-size: 13.5px; text-decoration: none; }
+  .fila a:hover { text-decoration: underline; }
+  .avisos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 30px; }
+  .aviso { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; font-size: 13.5px; color: var(--texto-sec); }
+  .aviso b { color: var(--texto); display: block; margin-bottom: 3px; }
+  .vacio { display: none; text-align: center; color: var(--texto-sec); padding: 30px; }
+  .oculto { display: none !important; }
+  footer { margin-top: 34px; text-align: center; font-size: 12.5px; color: var(--texto-sec); }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="envoltura">
+  <header>
+    <svg class="logo" viewBox="0 0 58 58" aria-hidden="true">
+      <rect x="1" y="1" width="56" height="56" rx="14" fill="#005A9C"/>
+      <rect x="13" y="15" width="32" height="28" rx="3" fill="none" stroke="#fff" stroke-width="2.6"/>
+      <path d="M13 24 H45" stroke="#fff" stroke-width="2.6"/>
+      <path d="M20 36 L26 30 L31 34 L38 28" fill="none" stroke="#f0a35e" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="18" cy="19.5" r="1.6" fill="#fff"/><circle cx="23" cy="19.5" r="1.6" fill="#fff"/>
+    </svg>
+    <div>
+      <h1>Eloia<span>a</span>soft</h1>
+      <p class="sub">Programas para el taller y el aula: CNC, G-code, diseño de muebles y matemáticas para la madera · Por Eloi A.A.</p>
+    </div>
+  </header>
+
+  <div class="barra">
+    <input class="buscar" id="buscar" type="search" placeholder="Buscar un programa… (simulador, láser, muebles, Pitágoras…)" aria-label="Buscar">
+    <div class="chips" id="chips">
+      <button class="chip activo" data-f="todo">Todo</button>
+      <button class="chip" data-f="cnc">CNC</button>
+      <button class="chip" data-f="madera">Madera y muebles</button>
+      <button class="chip" data-f="manual">Manuales</button>
+    </div>
+  </div>
+
+  <!-- ============ CNC ============ -->
+  <section data-seccion="cnc">
+    <h2>CNC y código ISO (G-code)</h2>
+    <div class="fichas">
+
+      <article class="ficha destacada" data-cat="cnc" data-repo="Suite-CNC" data-claves="calcador corrector anidador simulador 3d calculadora laser láser itinerario apuntes iso g-code gcode mecanizar">
+        <div class="cab">
+          <div class="icono"><svg viewBox="0 0 24 24"><path d="M4 18 V8 h5 v4 a3 3 0 0 0 6 0 V8 h5 v10 Z"/><circle cx="7.5" cy="14.5" r="1"/></svg></div>
+          <div><p class="nombre">Suite CNC <span class="etiqueta">La principal</span></p><span class="repo">Suite-CNC</span></div>
+        </div>
+        <p class="desc">Todas las herramientas para aprender y enseñar a programar en ISO: Calcador de contornos (con ⚙️ Mecanizar), Corrector, Anidador, Simulador 3D, Calculadora de taller, Calcador láser, apuntes e itinerario para alumnos.</p>
+        <div class="fecha"></div>
+        <div class="acciones">
+          <a class="boton" href="https://eloiaa-hub.github.io/Suite-CNC/">Abrir</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Suite-CNC/itinerario.html">🎯 Itinerario alumnos</a>
+          <a class="boton sec" href="https://github.com/eloiaa-hub/Suite-CNC">Repositorio</a>
+        </div>
+      </article>
+
+      <article class="ficha" data-cat="cnc" data-repo="Eloi-CAD" data-claves="cad dibujo 2d trazado planos">
+        <div class="cab">
+          <div class="icono"><svg viewBox="0 0 24 24"><path d="M3 21 L21 3"/><path d="M3 21 h8"/><path d="M3 21 v-8"/><circle cx="15" cy="9" r="4"/></svg></div>
+          <div><p class="nombre">Eloi CAD</p><span class="repo">Eloi-CAD</span></div>
+        </div>
+        <p class="desc">Programa de trazado 2D en el navegador para dibujar piezas y planos, con su manual.</p>
+        <div class="fecha"></div>
+        <div class="acciones">
+          <a class="boton" href="https://eloiaa-hub.github.io/Eloi-CAD/">Abrir</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Eloi-CAD/manual.html">Manual</a>
+          <a class="boton sec" href="https://github.com/eloiaa-hub/Eloi-CAD">Repositorio</a>
+        </div>
+      </article>
+
+      <article class="ficha" data-cat="cnc manual" data-repo="Manual-Harnnett" data-claves="härnnett harnnett manual máquina maquina">
+        <div class="cab">
+          <div class="icono"><svg viewBox="0 0 24 24"><path d="M5 4 h10 l4 4 v12 H5 Z"/><path d="M15 4 v4 h4"/><path d="M8 12 h8 M8 15 h8 M8 18 h5"/></svg></div>
+          <div><p class="nombre">Manual CNC Härnnett</p><span class="repo">Manual-Harnnett</span></div>
+        </div>
+        <p class="desc">Manual web de la CNC Härnnett del taller, con buscador y versión para imprimir.</p>
+        <div class="fecha"></div>
+        <div class="acciones">
+          <a class="boton" href="https://eloiaa-hub.github.io/Manual-Harnnett/">Abrir manual</a>
+          <a class="boton sec" href="https://github.com/eloiaa-hub/Manual-Harnnett">Repositorio</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ MADERA ============ -->
+  <section data-seccion="madera">
+    <h2>Madera y diseño de muebles</h2>
+    <div class="fichas">
+
+      <article class="ficha madera" data-cat="madera manual" data-repo="Made-rebanadas" data-claves="rebanadas paramétricas parametricas costillas varillas dxf orgánicos slice waffle">
+        <div class="cab">
+          <div class="icono"><svg viewBox="0 0 24 24"><path d="M5 20 V9 q0 -5 3 -5"/><path d="M10 20 V7 q0 -4 3 -4"/><path d="M15 20 V8 q0 -4 3 -4"/><path d="M3 14 h18"/></svg></div>
+          <div><p class="nombre">Made-rebanadas <span class="etiqueta nueva">Nuevo</span></p><span class="repo">Made-rebanadas</span></div>
+        </div>
+        <p class="desc">Muebles orgánicos hechos con rebanadas de tablero: diseño paramétrico, comprobación de varillas y DXF para la CNC.</p>
+        <div class="fecha"></div>
+        <div class="acciones">
+          <a class="boton" href="https://eloiaa-hub.github.io/Made-rebanadas/">Abrir</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Made-rebanadas/ayuda/manual.html">Manual</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Made-rebanadas/ayuda/manual.pdf">PDF</a>
+        </div>
+      </article>
+
+      <article class="ficha madera" data-cat="madera manual" data-repo="Boceto-Render-3D" data-claves="boceto render 3d mueblecad plano taller imagen realista">
+        <div class="cab">
+          <div class="icono"><svg viewBox="0 0 24 24"><path d="M12 3 L20 7.5 V16.5 L12 21 L4 16.5 V7.5 Z"/><path d="M4 7.5 L12 12 L20 7.5"/><path d="M12 12 V21"/></svg></div>
+          <div><p class="nombre">Boceto a Render 3D</p><span class="repo">Boceto-Render-3D</span></div>
+        </div>
+        <p class="desc">Del boceto del mueble a la imagen realista, y con MUEBLECAD 2D al plano de taller. Sin internet.</p>
+        <div class="fecha"></div>
+        <div class="acciones">
+          <a class="boton" href="https://eloiaa-hub.github.io/Boceto-Render-3D/">Abrir</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Boceto-Render-3D/ayuda/manual.html">Manual</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Boceto-Render-3D/ayuda/manual.pdf">PDF</a>
+        </div>
+      </article>
+
+      <article class="ficha madera" data-cat="madera manual" data-repo="Made-maticas" data-claves="matemáticas matematicas pitágoras pitagoras trigonometría trigonometria ángulos angulos medidas apuntes">
+        <div class="cab">
+          <div class="icono"><svg viewBox="0 0 24 24"><path d="M4 20 H20 L4 6 Z"/><path d="M4 16 h4 v4"/><path d="M14 20 a5 5 0 0 0 -1.6 -3.7"/></svg></div>
+          <div><p class="nombre">Made-máticas</p><span class="repo">Made-maticas</span></div>
+        </div>
+        <p class="desc">Matemáticas para la madera: medidas y ángulos en carpintería con Pitágoras, trigonometría y la calculadora. Apuntes y programa.</p>
+        <div class="fecha"></div>
+        <div class="acciones">
+          <a class="boton" href="https://eloiaa-hub.github.io/Made-maticas/programa/">Programa</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Made-maticas/apuntes/">Apuntes</a>
+          <a class="boton sec" href="https://eloiaa-hub.github.io/Made-maticas/">Portada</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ AUTOMÁTICO: repos nuevos ============ -->
+  <section data-seccion="otros" id="secOtros" class="oculto">
+    <h2>Otros proyectos</h2>
+    <div class="fichas" id="otros"></div>
+  </section>
+
+  <!-- ============ VERSIONES ANTERIORES ============ -->
+  <section data-seccion="archivo">
+    <h2>Versiones anteriores de la suite</h2>
+    <div class="lista">
+      <div class="fila" data-cat="cnc" data-repo="Herramientas-CNC" data-claves="calcador corrector anidador simulador">
+        <div class="info"><b>Herramientas CNC</b><small>Suite CNC 2026.10 · <span class="fecha"></span></small></div>
+        <a href="https://eloiaa-hub.github.io/Herramientas-CNC/">Abrir</a><a href="https://github.com/eloiaa-hub/Herramientas-CNC">Repositorio</a>
+      </div>
+      <div class="fila" data-cat="cnc" data-repo="Generador_Gcode" data-claves="generador g-code gcode calcador simulador">
+        <div class="info"><b>Generador G-code</b><small>Calcador, Generador de G-Code y Simulador 3D · <span class="fecha"></span></small></div>
+        <a href="https://eloiaa-hub.github.io/Generador_Gcode/">Abrir</a><a href="https://github.com/eloiaa-hub/Generador_Gcode">Repositorio</a>
+      </div>
+      <div class="fila" data-cat="cnc" data-repo="CNC-Harnnett" data-claves="härnnett harnnett calcador generador simulador">
+        <div class="info"><b>CNC Härnnett</b><small>Primera versión: Calcador, Generador y Simulador 3D · <span class="fecha"></span></small></div>
+        <a href="https://eloiaa-hub.github.io/CNC-Harnnett/">Abrir</a><a href="https://github.com/eloiaa-hub/CNC-Harnnett">Repositorio</a>
+      </div>
+    </div>
+  </section>
+
+  <p class="vacio" id="vacio">No hay ningún programa que coincida con la búsqueda.</p>
+
+  <div class="avisos">
+    <div class="aviso"><b>💻 Sin instalar nada</b>Los programas funcionan en Chrome, Edge o Firefox. Desde cada repositorio puedes descargarlos en .zip para usarlos sin internet.</div>
+    <div class="aviso"><b>🎓 Para el aula</b>Hechos para clase: cada programa trae su manual en HTML y PDF.</div>
+    <div class="aviso"><b>🔄 Siempre al día</b>Las fechas de actualización se leen de GitHub al abrir esta página. Si creas un proyecto nuevo con web, aparece solo en «Otros proyectos».</div>
+  </div>
+
+  <footer>Eloiaasoft · © 2026 Eloi A.A. · <a href="https://github.com/eloiaa-hub">github.com/eloiaa-hub</a></footer>
+</div>
+
+<script>
+(function () {
+  var USUARIO = 'eloiaa-hub';
+  // Repos que no deben salir en «Otros proyectos» aunque tengan web
+  var IGNORAR = [USUARIO + '.github.io'];
+
+  /* ---- Filtro y búsqueda ---- */
+  var filtro = 'todo';
+  var buscar = document.getElementById('buscar');
+  function quitarTildes(s) { return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function aplicar() {
+    var q = quitarTildes(buscar.value.trim());
+    var visibles = 0;
+    document.querySelectorAll('[data-cat]').forEach(function (el) {
+      var cats = el.getAttribute('data-cat').split(' ');
+      var texto = quitarTildes(el.textContent + ' ' + (el.getAttribute('data-claves') || ''));
+      var ok = (filtro === 'todo' || cats.indexOf(filtro) >= 0) && (!q || q.split(/\s+/).every(function (p) { return texto.indexOf(p) >= 0; }));
+      el.classList.toggle('oculto', !ok);
+      if (ok) visibles++;
+    });
+    document.querySelectorAll('section[data-seccion]').forEach(function (s) {
+      if (s.id === 'secOtros' && !document.getElementById('otros').children.length) return;
+      s.classList.toggle('oculto', !s.querySelector('[data-cat]:not(.oculto)'));
+    });
+    document.getElementById('vacio').style.display = visibles ? 'none' : 'block';
+  }
+  buscar.addEventListener('input', aplicar);
+  document.getElementById('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    document.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('activo', c === b); });
+    filtro = b.getAttribute('data-f'); aplicar();
+  });
+
+  /* ---- Datos en vivo de GitHub (si no hay internet, la página sigue funcionando) ---- */
+  function fecha(iso) {
+    var d = new Date(iso);
+    return 'Actualizado el ' + d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+  fetch('https://api.github.com/users/' + USUARIO + '/repos?per_page=100&sort=pushed')
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function (repos) {
+      var conocidos = {};
+      document.querySelectorAll('[data-repo]').forEach(function (el) { conocidos[el.getAttribute('data-repo').toLowerCase()] = el; });
+      var otros = document.getElementById('otros');
+      repos.forEach(function (r) {
+        var el = conocidos[r.name.toLowerCase()];
+        if (el) {
+          var f = el.querySelector('.fecha'); if (f) f.textContent = fecha(r.pushed_at);
+          return;
+        }
+        if (!r.has_pages || r.fork || r.archived || IGNORAR.indexOf(r.name) >= 0) return;
+        var web = 'https://' + USUARIO + '.github.io/' + r.name + '/';
+        var a = document.createElement('article');
+        a.className = 'ficha';
+        a.setAttribute('data-cat', 'otros');
+        a.setAttribute('data-repo', r.name);
+        a.innerHTML =
+          '<div class="cab"><div class="icono"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12 h8 M12 8 v8"/></svg></div>' +
+          '<div><p class="nombre">' + esc(r.name.replace(/[-_]/g, ' ')) + '</p><span class="repo">' + esc(r.name) + '</span></div></div>' +
+          '<p class="desc">' + esc(r.description || 'Proyecto de Eloi A.A.') + '</p>' +
+          '<div class="fecha">' + fecha(r.pushed_at) + '</div>' +
+          '<div class="acciones"><a class="boton" href="' + web + '">Abrir</a><a class="boton sec" href="' + r.html_url + '">Repositorio</a></div>';
+        otros.appendChild(a);
+      });
+      if (otros.children.length) document.getElementById('secOtros').classList.remove('oculto');
+      aplicar();
+    })
+    .catch(function () { /* sin conexión o límite de la API: se queda la lista fija */ });
+})();
+</script>
+</body>
+</html>
